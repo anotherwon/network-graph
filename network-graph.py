@@ -38,6 +38,11 @@ class NetworkInterface:
             if self.type == 'tun':
                 self.type = data['linkinfo']['info_data']['type']
 
+        self.addresses = []
+        if 'addr_info' in data:
+            for address in data['addr_info']:
+                self.addresses.append(str(address['local']) + "/" + str(address['prefixlen']))
+
     def __str__(self):
         return str(self.index) + ": " + self.name
 
@@ -46,6 +51,10 @@ class NetworkInterface:
         result.append(f'<b><font color="{self.get_color()}">{self.name}</font></b>')
         if self.type is not None:
             result.append(f'<br/>type: {self.type}')
+        if len(self.addresses) > 0:
+            result.append('<br/>')
+            for address in self.addresses:
+                result.append(f'<br/>{address}')
         result.append('>')
         return ''.join(result)
 
