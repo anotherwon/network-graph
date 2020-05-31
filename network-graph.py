@@ -85,7 +85,7 @@ class NetworkNamespace:
 
     def add_ns_mapping(self, data):
         if 'name' not in data:
-            data['name'] = 'default'
+            data['name'] = ''
         self.mapping.update({data['nsid']: data['name']})
 
     def get_interface_index(self, name):
@@ -107,7 +107,7 @@ def main():
         sys.exit('usage')
 
     namespaces = {}
-    nsname = 'default'
+    nsname = ''
     namespaces[nsname] = NetworkNamespace(nsname)
     for line in infile:
         if line.startswith('['):
@@ -128,7 +128,8 @@ def main():
 
     for namespace in namespaces.values():
         with dot.subgraph(name='cluster_' + namespace.name) as c:
-            c.attr(label='netns: ' + namespace.name)
+            if len(namespace.name) > 0:
+                c.attr(label='netns: ' + namespace.name)
             c.attr(margin='16')
             for interface in namespace.interfaces:
                 node_prefix = 'node_' + namespace.name + '_'
