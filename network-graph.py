@@ -161,8 +161,6 @@ def main():
                 dot.edge(node_name, remote_node_name, constraint='false', style='dashed')
 
     print(dot.source)
-    dot.format = 'x11'
-    dot.render()
 
 
 if __name__ == '__main__':
