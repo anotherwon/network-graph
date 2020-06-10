@@ -104,8 +104,9 @@ def main():
     elif len(sys.argv) == 2:
         infile = open(sys.argv[1], 'r')
     else:
-        sys.exit('usage')
+        sys.exit('usage: ' + sys.argv[0] + ' [FILE]')
 
+    # parse json
     namespaces = {}
     nsname = ''
     namespaces[nsname] = NetworkNamespace(nsname)
@@ -136,23 +137,25 @@ def main():
                 node_name = node_prefix + str(interface.index)
                 c.node(node_name, interface.get_label())
 
+                # draw edges for master interfaces (bridge, vrf, etc.)
                 if interface.master is not None:
                     master_index = namespace.get_interface_index(interface.master)
                     if master_index is None:
                         sys.exit("master index for %s not found!".format(interface.master))
                     c.edge(node_prefix + str(master_index), node_name)
 
+                # draw edges to linked interfaces in the same namespace
                 if interface.link is not None:
                     link_index = namespace.get_interface_index(interface.link)
                     if link_index is None:
                         sys.exit("link index for %s not found!".format(interface.link))
                     c.edge(node_name, node_prefix + str(link_index), constraint='false', style='dashed')
 
+    # draw edges to linked interfaces in other namespaces
     for namespace in namespaces.values():
         for interface in namespace.interfaces:
-            node_prefix = 'node_' + namespace.name + '_'
-            node_name = node_prefix + str(interface.index)
             if interface.link_index is not None and interface.link_netnsid is not None:
+                node_name = 'node_' + namespace.name + '_' + str(interface.index)
                 link_nsname = namespace.get_nsname(interface.link_netnsid)
                 remote_node_name = 'node_' + link_nsname + '_' + str(interface.link_index)
                 dot.edge(node_name, remote_node_name, constraint='false', style='dashed')
